@@ -115,7 +115,7 @@ namespace Tidy.Core
         {
             try
             {
-                Res = new ResourceManager("TidyNet.TidyMessages", Assembly.GetExecutingAssembly());
+                Res = new ResourceManager("TidyNet.TidyMessages", typeof(Report).GetTypeInfo().Assembly);
             }
             catch (MissingManifestResourceException e)
             {

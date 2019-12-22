@@ -1,0 +1,10 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Tidy</RootNamespace>
+    <TargetFramework>netstandard1.0</TargetFramework>
+    <Description>Netstandard Version of Dave Ragget's Tidy Library based on Tidy.NET  (http://sourceforge.net/projects/tidynet/)</Description>
+    <PackageLicenseExpression>W3C</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/zeit200/TidyNetstandard</PackageProjectUrl>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+</Project>
