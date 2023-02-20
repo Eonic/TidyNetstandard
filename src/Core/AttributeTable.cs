@@ -246,7 +246,7 @@ namespace Tidy.Core
 
         public virtual Attribute Lookup(string name)
         {
-            return (Attribute) _attributeHashtable[name];
+            return _attributeHashtable.TryGetValue(name, out var attribute) ? (Attribute)attribute : null;
         }
 
         public virtual Attribute Install(Attribute attr)
