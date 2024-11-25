@@ -107,6 +107,10 @@ namespace Tidy.Core
         /// <summary>Remove presentational clutter</summary>
         public virtual bool MakeClean { get; set; }
 
+        public virtual bool MakeBare { get; set; }
+
+        public virtual bool BodyOnly { get; set; }
+
         /// <summary>O/p newline before &lt;br&gt; or not?</summary>
         public virtual bool BreakBeforeBr { get; set; }
 
@@ -444,7 +448,7 @@ namespace Tidy.Core
                 _elements.AddRange(source.Split(_delimiters.ToCharArray()));
                 for (int index = 0; index < _elements.Count; index++)
                 {
-                    if ((string) _elements[index] == "")
+                    if ((string)_elements[index] == "")
                     {
                         _elements.RemoveAt(index);
                         index--;
@@ -468,13 +472,13 @@ namespace Tidy.Core
                 _elements.AddRange(_source.Split(_delimiters.ToCharArray()));
                 for (int index = 0; index < _elements.Count; index++)
                 {
-                    if ((string) _elements[index] == "")
+                    if ((string)_elements[index] == "")
                     {
                         _elements.RemoveAt(index);
                         index--;
                     }
                 }
-                var result = (string) _elements[0];
+                var result = (string)_elements[0];
                 _elements.RemoveAt(0);
                 _source = _source.Remove(_source.IndexOf(result, StringComparison.Ordinal), result.Length);
                 _source = _source.TrimStart(_delimiters.ToCharArray());

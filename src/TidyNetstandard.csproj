@@ -6,7 +6,7 @@
     <PackageLicenseExpression>W3C</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/zeit200/TidyNetstandard</PackageProjectUrl>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.2</Version>
+    <Version>1.0.3</Version>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>TidyNetstandard.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>

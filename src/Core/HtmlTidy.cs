@@ -153,7 +153,7 @@ namespace Tidy.Core
             if (at == null)
                 return;
 
-            var tt = new TagCollection {Options = _options};
+            var tt = new TagCollection { Options = _options };
             _options.TagTable = tt;
         }
 
@@ -169,20 +169,20 @@ namespace Tidy.Core
         /// <param name="input">The input stream</param>
         /// <param name="output">The output stream</param>
         /// <param name="messages">The messages</param>
-        public void Parse(Stream input, Stream output, TidyMessageCollection messages=null)
+        public void Parse(Stream input, Stream output, TidyMessageCollection messages = null)
         {
             messages = messages ?? new TidyMessageCollection();
             ParseInternal(input, output, messages);
         }
 
-        public void Parse(string input, Stream output, TidyMessageCollection messages=null)
+        public void Parse(string input, Stream output, TidyMessageCollection messages = null)
         {
             var html = Parse(input, messages);
             using (var writer = new StreamWriter(output))
                 writer.Write(html);
         }
 
-        public string Parse(Stream input, TidyMessageCollection messages=null)
+        public string Parse(Stream input, TidyMessageCollection messages = null)
         {
             var memoryStream = new MemoryStream();
             Parse(input, memoryStream, messages);
@@ -191,25 +191,28 @@ namespace Tidy.Core
                 return reader.ReadToEnd();
         }
 
-        public string Parse(string input, TidyMessageCollection messages=null)
+        public string Parse(string input, TidyMessageCollection messages = null)
         {
             var memoryStream = new MemoryStream();
+            string html = "";
             using (var writer = new StreamWriter(memoryStream))
             {
                 writer.Write(input);
-                var html = Parse(memoryStream, messages);
-                return html;
+                writer.Flush();
+                memoryStream.Position = 0;
+                html = Parse(memoryStream, messages);
             }
+            return html;
         }
 
-        public XElement ParseXml(Stream input, TidyMessageCollection messages=null)
+        public XElement ParseXml(Stream input, TidyMessageCollection messages = null)
         {
-            Options.DocType=DocType.Strict;
+            Options.DocType = DocType.Strict;
             Options.QuoteNbsp = false;
             Options.XmlOut = true;
             Options.Xhtml = true;
 
-            var html=Parse(input, messages);
+            var html = Parse(input, messages);
             return XElement.Parse(html);
         }
 
@@ -226,13 +229,19 @@ namespace Tidy.Core
             /* ensure config is self-consistent */
             _options.Adjust();
 
+            //using (var reader = new StreamReader(input))
+            //{
+            //    string response = reader.ReadToEnd();
+            //    input.Flush();
+            //    input.Position = 0;
+            //}
 
             if (input != null)
             {
                 var lexer = new Lexer(new ClsStreamInImpl(input, _options.CharEncoding, _options.TabSize), _options)
-                    {
-                        Messages = messages
-                    };
+                {
+                    Messages = messages
+                };
 
                 /*
 				store pointer to lexer in input stream
@@ -287,13 +296,17 @@ namespace Tidy.Core
                         cleaner.CleanTree(lexer, document);
                     }
 
+
+
+
+
                     if (!document.CheckNodeIntegrity())
                     {
                         Report.BadTree(lexer);
                         return null;
                     }
                     doctype = document.FindDocType();
-                    if (document.Content != null)
+                    if (document.Content != null && _options.MakeBare != true)
                     {
                         if (_options.Xhtml)
                         {
@@ -309,6 +322,8 @@ namespace Tidy.Core
                             lexer.AddGenerator(document);
                         }
                     }
+
+
 
                     /* ensure presence of initial <?XML version="1.0"?> */
                     if (_options.XmlOut && _options.XmlPi)
@@ -326,6 +341,11 @@ namespace Tidy.Core
                 if (lexer.Messages.Errors > 0)
                 {
                     Report.NeedsAuthorIntervention(lexer);
+                }
+
+                if (_options.BodyOnly)
+                {
+                    document = document.FindBody(_options.TagTable);
                 }
 
                 o.State = StreamIn.FSM_ASCII;
@@ -396,7 +416,9 @@ namespace Tidy.Core
                 Report.ErrorSummary(lexer);
             }
 
+
             return document;
+
         }
 
         /// <summary>
@@ -407,7 +429,7 @@ namespace Tidy.Core
         {
             Node document = ParseInternal(input, output, messages);
             if (document != null)
-                return (IDocument) document.Adapter;
+                return (IDocument)document.Adapter;
             return null;
         }
 
@@ -417,7 +439,7 @@ namespace Tidy.Core
             var document = new Node(Node.ROOT_NODE, new byte[0], 0, 0);
             var node = new Node(Node.START_TAG, new byte[0], 0, 0, "html", new TagCollection());
             Node.InsertNodeAtStart(document, node);
-            return (IDocument) document.Adapter;
+            return (IDocument)document.Adapter;
         }
 
         /// <summary>Pretty-prints a DOM Document.</summary>
@@ -430,7 +452,7 @@ namespace Tidy.Core
                 return;
             }
 
-            Node document = ((DomDocumentImpl) doc).Adaptee;
+            Node document = ((DomDocumentImpl)doc).Adaptee;
 
             o.State = StreamIn.FSM_ASCII;
             o.Encoding = _options.CharEncoding;
