@@ -2,7 +2,7 @@
   <PropertyGroup>
     <RootNamespace>Tidy</RootNamespace>
     <TargetFramework>netstandard1.0</TargetFramework>
-    <Description>Netstandard Version of Dave Ragget's Tidy Library based on Tidy.NET  (http://sourceforge.net/projects/tidynet/) updated to include html 5 tags.</Description>
+    <Description>.Net Standard Version of Dave Ragget's Tidy Library based on Tidy.NET (http://sourceforge.net/projects/tidynet/) with HTML5 tags added as implemented in ProteanCMS. Thank you to ziet200</Description>
     <PackageLicenseExpression>W3C</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/eonic/TidyNetstandard</PackageProjectUrl>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -11,7 +11,7 @@
     <AssemblyOriginatorKeyFile>TidyNetstandard.snk</AssemblyOriginatorKeyFile>
     <NeutralLanguage>en</NeutralLanguage>
     <Title>HTMLTidy .Net Standard</Title>
-    <Authors>proteancms</Authors>
+    <Authors>Trevor Spink</Authors>
     <Company>Eonic Digital LLP.</Company>
     <PackageId>TidyNetStandard5</PackageId>
     <PackageReadmeFile>README.md</PackageReadmeFile>
