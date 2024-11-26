@@ -201,7 +201,38 @@ namespace Tidy.Core
                 new Dict("button", HtmlVersion.Html40, ContentModel.INLINE, ParserImpl.ParseInline, null),
                 new Dict("basefont", HtmlVersion.Loose, ContentModel.INLINE | ContentModel.EMPTY, null, null),
                 new Dict("font", HtmlVersion.Loose, ContentModel.INLINE, ParserImpl.ParseInline, null),
-                new Dict("bdo", HtmlVersion.Html40, ContentModel.INLINE, ParserImpl.ParseInline, null)
+                new Dict("bdo", HtmlVersion.Html40, ContentModel.INLINE, ParserImpl.ParseInline, null),
+                new Dict("article", HtmlVersion.Html5, ContentModel.BLOCK, ParserImpl.ParseBlock, null),
+                new Dict("aside", HtmlVersion.Html5, ContentModel.BLOCK, ParserImpl.ParseBlock, null),
+                new Dict("audio", HtmlVersion.Html5, ContentModel.BLOCK | ContentModel.INLINE, ParserImpl.ParseBlock, null),
+                new Dict("canvas", HtmlVersion.Html5, ContentModel.BLOCK, ParserImpl.ParseBlock, null),
+                new Dict("command", HtmlVersion.Html5, ContentModel.HEAD | ContentModel.INLINE | ContentModel.EMPTY, ParserImpl.ParseInline, null),
+                new Dict("datalist", HtmlVersion.Html5, ContentModel.INLINE | ContentModel.FIELD, ParserImpl.ParseDefList, null), //TODO
+                new Dict("details", HtmlVersion.Html5, ContentModel.BLOCK, ParserImpl.ParseBlock, null),
+                new Dict("dialog", HtmlVersion.Html5, ContentModel.BLOCK, ParserImpl.ParseBlock, null),
+                new Dict("embed", HtmlVersion.Html5, ContentModel.INLINE | ContentModel.IMG | ContentModel.EMPTY, ParserImpl.ParseEmpty, null),
+                new Dict("figure", HtmlVersion.Html5, ContentModel.BLOCK, ParserImpl.ParseBlock, null),
+                new Dict("figcaption", HtmlVersion.Html5, ContentModel.INLINE, ParserImpl.ParseBlock, null),
+                new Dict("footer", HtmlVersion.Html5, ContentModel.BLOCK, ParserImpl.ParseBlock, null),
+                new Dict("header", HtmlVersion.Html5, ContentModel.BLOCK, ParserImpl.ParseBlock, null),
+                new Dict("hgroup", HtmlVersion.Html5, ContentModel.BLOCK, ParserImpl.ParseBlock, null),
+                new Dict("keygen", HtmlVersion.Html5, ContentModel.INLINE | ContentModel.EMPTY, ParserImpl.ParseEmpty, null),
+                new Dict("mark", HtmlVersion.Html5, ContentModel.INLINE, ParserImpl.ParseInline, null),
+                new Dict("menu", HtmlVersion.Html5, ContentModel.BLOCK, ParserImpl.ParseBlock, null),
+                new Dict("menuitem", HtmlVersion.Html5, ContentModel.BLOCK | ContentModel.BLOCK | ContentModel.MIXED, ParserImpl.ParseInline, null),
+                new Dict("meter", HtmlVersion.Html5, ContentModel.INLINE, ParserImpl.ParseInline, null),
+                new Dict("nav", HtmlVersion.Html5, ContentModel.BLOCK, ParserImpl.ParseBlock, null),
+                new Dict("output", HtmlVersion.Html5, ContentModel.INLINE, ParserImpl.ParseInline, null),
+                new Dict("progress", HtmlVersion.Html5, ContentModel.INLINE, ParserImpl.ParseInline, null),
+                new Dict("ruby", HtmlVersion.Html5, ContentModel.INLINE, ParserImpl.ParseInline, null),
+                new Dict("section", HtmlVersion.Html5, ContentModel.BLOCK, ParserImpl.ParseBlock, null),
+                new Dict("summary", HtmlVersion.Html5, ContentModel.BLOCK, ParserImpl.ParseBlock, null),
+                new Dict("source", HtmlVersion.Html5, ContentModel.BLOCK | ContentModel.INLINE | ContentModel.EMPTY, ParserImpl.ParseBlock, null),
+                new Dict("template", HtmlVersion.Html5, ContentModel.BLOCK, ParserImpl.ParseBlock, null),
+                new Dict("time", HtmlVersion.Html5, ContentModel.INLINE, ParserImpl.ParseInline, null),
+                new Dict("track", HtmlVersion.Html5, ContentModel.BLOCK | ContentModel.EMPTY, ParserImpl.ParseBlock, null),
+                new Dict("video", HtmlVersion.Html5, ContentModel.BLOCK | ContentModel.INLINE, ParserImpl.ParseBlock, null),
+                new Dict("wbr", HtmlVersion.Html5, ContentModel.INLINE | ContentModel.EMPTY, ParserImpl.ParseEmpty, null)
             };
 
         private readonly Dictionary<object, object> _tagHashtable = new Dictionary<object, object>();
@@ -337,12 +368,22 @@ namespace Tidy.Core
 
         public Dict Lookup(string name)
         {
-            return (Dict) _tagHashtable[name];
+            try
+            {
+                return (Dict)_tagHashtable[name];
+            }
+            catch (System.Exception ex)
+            {
+                string err = ex.Message;
+                return null;
+            }
+
+
         }
 
         public Dict Add(Dict dict)
         {
-            Dict d = _tagHashtable.ContainsKey(dict.Name) ? (Dict) _tagHashtable[dict.Name] : null;
+            Dict d = _tagHashtable.ContainsKey(dict.Name) ? (Dict)_tagHashtable[dict.Name] : null;
             if (d != null)
             {
                 d.Versions = dict.Versions;

@@ -598,7 +598,7 @@ namespace Tidy.Core
                     }
                     else if (state == 1)
                     {
-                        docTypeStr.Append((char) c);
+                        docTypeStr.Append((char)c);
                     }
                 }
 
@@ -652,11 +652,12 @@ namespace Tidy.Core
         {
             try
             {
-                return Res.GetString(key);
+                return key;
+                // return Res.GetString(key);
             }
-            catch (MissingManifestResourceException e)
+            catch (MissingManifestResourceException)
             {
-                return e.ToString();
+                return key + " resource key missing";// e.ToString();
             }
         }
     }

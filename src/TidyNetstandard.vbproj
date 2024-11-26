@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <RootNamespace>Tidy</RootNamespace>
+    <OptionInfer>On</OptionInfer>
+    <RootNamespace></RootNamespace>
     <TargetFramework>netstandard1.0</TargetFramework>
     <Description>Netstandard Version of Dave Ragget's Tidy Library based on Tidy.NET  (http://sourceforge.net/projects/tidynet/)</Description>
     <PackageLicenseExpression>W3C</PackageLicenseExpression>
@@ -9,6 +10,6 @@
     <Version>1.0.3</Version>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>TidyNetstandard.snk</AssemblyOriginatorKeyFile>
-    <NeutralLanguage>en</NeutralLanguage>
+    <DefaultItemExcludes>$(DefaultItemExcludes);$(ProjectDir)**\*.cs</DefaultItemExcludes>
   </PropertyGroup>
 </Project>

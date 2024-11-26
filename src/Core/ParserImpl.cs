@@ -71,6 +71,7 @@ namespace Tidy.Core
         public static IParser ParseSelect { get; private set; }
         public static IParser ParseText { get; private set; }
         public static IParser ParseOptGroup { get; private set; }
+        public static IParser ParseEmpty { get; private set; }
 
         private static void ParseTag(Lexer lexer, Node node, short mode)
         {
@@ -134,61 +135,68 @@ namespace Tidy.Core
         {
             Node doctype = null;
             TagCollection tt = lexer.Options.TagTable;
-
-            Node document = lexer.NewNode();
-            document.Type = Node.ROOT_NODE;
-
-            while (true)
+            try
             {
-                Node node = lexer.GetToken(Lexer.IGNORE_WHITESPACE);
-                if (node == null)
-                {
-                    break;
-                }
+                Node document = lexer.NewNode();
+                document.Type = Node.ROOT_NODE;
 
-                /* deal with comments etc. */
-                if (Node.InsertMisc(document, node))
+                while (true)
                 {
-                    continue;
-                }
-
-                if (node.Type == Node.DOC_TYPE_TAG)
-                {
-                    if (doctype == null)
+                    Node node = lexer.GetToken(Lexer.IGNORE_WHITESPACE);
+                    if (node == null)
                     {
-                        Node.InsertNodeAtEnd(document, node);
-                        doctype = node;
+                        break;
+                    }
+
+                    /* deal with comments etc. */
+                    if (Node.InsertMisc(document, node))
+                    {
+                        continue;
+                    }
+
+                    if (node.Type == Node.DOC_TYPE_TAG)
+                    {
+                        if (doctype == null)
+                        {
+                            Node.InsertNodeAtEnd(document, node);
+                            doctype = node;
+                        }
+                        else
+                        {
+                            Report.Warning(lexer, document, node, Report.DISCARDING_UNEXPECTED);
+                        }
+                        continue;
+                    }
+
+                    if (node.Type == Node.END_TAG)
+                    {
+                        Report.Warning(lexer, document, node, Report.DISCARDING_UNEXPECTED); //TODO?
+                        continue;
+                    }
+
+                    Node html;
+                    if (node.Type != Node.START_TAG || node.Tag != tt.TagHtml)
+                    {
+                        lexer.UngetToken();
+                        html = lexer.InferredTag("html");
                     }
                     else
                     {
-                        Report.Warning(lexer, document, node, Report.DISCARDING_UNEXPECTED);
+                        html = node;
                     }
-                    continue;
+
+                    Node.InsertNodeAtEnd(document, html);
+                    ParseHtml.Parse(lexer, html, 0); // TODO?
+                    break;
                 }
 
-                if (node.Type == Node.END_TAG)
-                {
-                    Report.Warning(lexer, document, node, Report.DISCARDING_UNEXPECTED); //TODO?
-                    continue;
-                }
-
-                Node html;
-                if (node.Type != Node.START_TAG || node.Tag != tt.TagHtml)
-                {
-                    lexer.UngetToken();
-                    html = lexer.InferredTag("html");
-                }
-                else
-                {
-                    html = node;
-                }
-
-                Node.InsertNodeAtEnd(document, html);
-                ParseHtml.Parse(lexer, html, 0); // TODO?
-                break;
+                return document;
             }
-
-            return document;
+            catch (Exception ex)
+            {
+                string errmsg = ex.Message;
+                return null;
+            }
         }
 
         /// <summary>
@@ -315,7 +323,7 @@ namespace Tidy.Core
 
             if (node != null && node.Type == Node.TEXT_NODE && mode != Lexer.PREFORMATTED)
             {
-                if (node.Textarray[node.Start] == (sbyte) ' ')
+                if (node.Textarray[node.Start] == (sbyte)' ')
                 {
                     node.Start++;
 
@@ -335,7 +343,7 @@ namespace Tidy.Core
 
             if (node != null && node.Type == Node.TEXT_NODE && mode != Lexer.PREFORMATTED)
             {
-                if (node.Textarray[node.End - 1] == (sbyte) ' ')
+                if (node.Textarray[node.End - 1] == (sbyte)' ')
                 {
                     node.End--;
 
@@ -602,7 +610,7 @@ namespace Tidy.Core
                     if (node.Type == Node.TEXT_NODE)
                     {
                         bool iswhitenode = node.Type == Node.TEXT_NODE && node.End <= node.Start + 1 &&
-                                           lexer.Lexbuf[node.Start] == (sbyte) ' ';
+                                           lexer.Lexbuf[node.Start] == (sbyte)' ';
 
                         if (lexer.Options.EncloseBlockText && !iswhitenode)
                         {
@@ -632,7 +640,7 @@ namespace Tidy.Core
 						HTML4 strict doesn't allow mixed content for
 						elements with %block; as their content model
 						*/
-                        lexer.Versions &= ~ HtmlVersion.Html40Strict;
+                        lexer.Versions &= ~HtmlVersion.Html40Strict;
                         continue;
                     }
 
@@ -747,7 +755,7 @@ namespace Tidy.Core
                                 return;
                             }
                         }
-                            /* things like list items */
+                        /* things like list items */
                         else
                         {
                             if ((element.Tag.Model & ContentModel.OPT) == 0 && !element.Isimplicit)
@@ -950,7 +958,7 @@ namespace Tidy.Core
                     }
 
                     bool iswhitenode = node.Type == Node.TEXT_NODE && node.End <= node.Start + 1 &&
-                                       node.Textarray[node.Start] == (sbyte) ' ';
+                                       node.Textarray[node.Start] == (sbyte)' ';
 
                     /* deal with comments etc. */
                     if (Node.InsertMisc(body, node))
@@ -982,7 +990,7 @@ namespace Tidy.Core
                             continue;
                         }
                         /* strict doesn't allow text here */
-                        lexer.Versions &= ~ (HtmlVersion.Html40Strict | HtmlVersion.Html20);
+                        lexer.Versions &= ~(HtmlVersion.Html40Strict | HtmlVersion.Html20);
 
                         if (checkstack)
                         {
@@ -1114,11 +1122,11 @@ namespace Tidy.Core
                             /* but HTML2 does allow img elements as children of body */
                             if (node.Tag == tt.TagImg)
                             {
-                                lexer.Versions &= ~ HtmlVersion.Html40Strict;
+                                lexer.Versions &= ~HtmlVersion.Html40Strict;
                             }
                             else
                             {
-                                lexer.Versions &= ~ (HtmlVersion.Html40Strict | HtmlVersion.Html20);
+                                lexer.Versions &= ~(HtmlVersion.Html40Strict | HtmlVersion.Html20);
                             }
 
                             if (checkstack && !node.Isimplicit)
@@ -1249,7 +1257,7 @@ namespace Tidy.Core
                 if ((list.Tag.Model & ContentModel.EMPTY) != 0)
                     return;
 
-                lexer.Insert = - 1; /* defer implicit inline start tags */
+                lexer.Insert = -1; /* defer implicit inline start tags */
 
                 while (true)
                 {
@@ -1551,7 +1559,7 @@ namespace Tidy.Core
                 lexer.SeenBodyEndTag = 0;
                 TagCollection tt = lexer.Options.TagTable;
 
-                for (;;)
+                for (; ; )
                 {
                     node = lexer.GetToken(Lexer.IGNORE_WHITESPACE);
 
@@ -1585,7 +1593,7 @@ namespace Tidy.Core
                 Node.InsertNodeAtEnd(html, head);
                 ParseHead.Parse(lexer, head, mode);
 
-                for (;;)
+                for (; ; )
                 {
                     node = lexer.GetToken(Lexer.IGNORE_WHITESPACE);
 
@@ -2007,7 +2015,7 @@ namespace Tidy.Core
                             Report.Warning(lexer, element, node, Report.DISCARDING_UNEXPECTED);
                             continue;
                         }
-                            /* special case </tr> etc. for stuff moved in front of table */
+                        /* special case </tr> etc. for stuff moved in front of table */
                         else if (lexer.Exiled && node.Tag.Model != 0 && (node.Tag.Model & ContentModel.TABLE) != 0)
                         {
                             lexer.UngetToken();
@@ -2296,7 +2304,7 @@ namespace Tidy.Core
                     return;
                 }
 
-                lexer.Insert = - 1; /* defer implicit inline start tags */
+                lexer.Insert = -1; /* defer implicit inline start tags */
 
                 while (true)
                 {
@@ -2481,7 +2489,7 @@ namespace Tidy.Core
             {
                 TagCollection tt = lexer.Options.TagTable;
 
-                lexer.Insert = - 1; /* defer implicit inline start tags */
+                lexer.Insert = -1; /* defer implicit inline start tags */
 
                 while (true)
                 {
@@ -2564,7 +2572,7 @@ namespace Tidy.Core
                         /* if first check for inital newline */
                         if (pre.Content == null)
                         {
-                            if (node.Textarray[node.Start] == (sbyte) '\n')
+                            if (node.Textarray[node.Start] == (sbyte)'\n')
                             {
                                 ++node.Start;
                             }
@@ -2854,7 +2862,7 @@ namespace Tidy.Core
 
                     /* pop inline stack */
 
-                    while (lexer.Istack.Count > lexer.Istackbase)
+                    while (lexer.Istack.Count > lexer.Istackbase && lexer.Istackbase != 0)
                         lexer.PopInline(null);
                 }
 
@@ -3036,7 +3044,7 @@ namespace Tidy.Core
             {
                 TagCollection tt = lexer.Options.TagTable;
 
-                lexer.Insert = - 1; /* defer implicit inline start tags */
+                lexer.Insert = -1; /* defer implicit inline start tags */
 
                 while (true)
                 {
@@ -3129,8 +3137,8 @@ namespace Tidy.Core
 							This has been reported to Dave Raggett <dsr@w3.org>
 							*/
                             //Should be?: if (!(node.Type == Node.TextNode))
-//							if (false)
-//								TidyNet.ParserImpl.parseTag(lexer, node, Lexer.IgnoreWhitespace);
+                            //							if (false)
+                            //								TidyNet.ParserImpl.parseTag(lexer, node, Lexer.IgnoreWhitespace);
 
                             lexer.Exiled = false;
                             continue;
@@ -3206,7 +3214,7 @@ namespace Tidy.Core
             {
                 TagCollection tt = lexer.Options.TagTable;
 
-                lexer.Insert = - 1; /* defer implicit inline start tags */
+                lexer.Insert = -1; /* defer implicit inline start tags */
 
                 if (field.Tag == tt.TagTextarea)
                     mode = Lexer.PREFORMATTED;

@@ -169,7 +169,7 @@ namespace Tidy.Core
             Lexlength = 0;
             Lexsize = 0;
             Inode = null;
-            Insert = - 1;
+            Insert = -1;
             Istack = new Stack<InlineStack>();
             Istackbase = 0;
             Styles = null;
@@ -201,7 +201,7 @@ namespace Tidy.Core
 
         public virtual Node CloneNode(Node node)
         {
-            var cnode = (Node) node.Clone();
+            var cnode = (Node)node.Clone();
             _nodeList.Add(cnode);
             for (AttVal att = cnode.Attributes; att != null; att = att.Next)
             {
@@ -215,7 +215,7 @@ namespace Tidy.Core
 
         public virtual AttVal CloneAttributes(AttVal attrs)
         {
-            var cattrs = (AttVal) attrs.Clone();
+            var cattrs = (AttVal)attrs.Clone();
             for (AttVal att = cattrs; att != null; att = att.Next)
             {
                 if (att.Asp != null)
@@ -290,7 +290,7 @@ namespace Tidy.Core
                     if (Lexlength == 0)
                         Lexlength = 8192;
                     else
-                        Lexlength = Lexlength*2;
+                        Lexlength = Lexlength * 2;
                 }
 
                 byte[] temp = Lexbuf;
@@ -302,8 +302,8 @@ namespace Tidy.Core
                 }
             }
 
-            Lexbuf[Lexsize++] = (byte) c;
-            Lexbuf[Lexsize] = (byte) '\x0000'; /* debug */
+            Lexbuf[Lexsize++] = (byte)c;
+            Lexbuf[Lexsize] = (byte)'\x0000'; /* debug */
         }
 
         public virtual void ChangeChar(byte c)
@@ -403,7 +403,7 @@ namespace Tidy.Core
                 }
 
                 first = false;
-                short map = Map((char) c);
+                short map = Map((char)c);
 
                 /* AQ: Added flag for numeric entities so that numeric entities
 				with missing semi-colons are recognized.
@@ -443,7 +443,7 @@ namespace Tidy.Core
                     if (semicolon)
                         AddCharToLexer(';');
                 }
-                    /* naked & */
+                /* naked & */
                 else
                 {
                     Report.EntityError(this, Report.UNESCAPED_AMPERSAND, str, ch);
@@ -452,7 +452,7 @@ namespace Tidy.Core
             else
             {
                 if (c != ';')
-                    /* issue warning if not terminated by ';' */
+                /* issue warning if not terminated by ';' */
                 {
                     /* set error position just before offending chararcter */
                     Lines = Input.CursorLine;
@@ -485,12 +485,12 @@ namespace Tidy.Core
             /* fold case of first char in buffer */
 
             c = Lexbuf[Txtstart];
-            map = Map((char) c);
+            map = Map((char)c);
 
             if (!Options.XmlTags && (map & UPPERCASE) != 0)
             {
                 c += ('a' - 'A');
-                Lexbuf[Txtstart] = (byte) c;
+                Lexbuf[Txtstart] = (byte)c;
             }
 
             while (true)
@@ -500,7 +500,7 @@ namespace Tidy.Core
                 {
                     break;
                 }
-                map = Map((char) c);
+                map = Map((char)c);
 
                 if ((map & NAMECHAR) == 0)
                 {
@@ -518,7 +518,7 @@ namespace Tidy.Core
             }
 
             Txtend = Lexsize;
-            return (char) c;
+            return (char)c;
         }
 
         public virtual void AddStringLiteral(string str)
@@ -697,7 +697,7 @@ namespace Tidy.Core
 
             for (i = doctype.Start; i < doctype.End; ++i)
             {
-                if (Lexbuf[i] != (byte) '"') continue;
+                if (Lexbuf[i] != (byte)'"') continue;
                 str1 = GetString(Lexbuf, i + 1, 12);
                 string str2 = GetString(Lexbuf, i + 1, 13);
                 string p;
@@ -708,7 +708,7 @@ namespace Tidy.Core
                 {
                     /* compute length of identifier e.g. "HTML 4.0 Transitional" */
                     //TODO:odd!
-                    for (j = i + 13; j < doctype.End && Lexbuf[j] != (byte) '/'; ++j)
+                    for (j = i + 13; j < doctype.End && Lexbuf[j] != (byte)'/'; ++j)
                     {
                     }
 
@@ -730,7 +730,7 @@ namespace Tidy.Core
                 {
                     /* compute length of identifier e.g. "HTML 2.0" */
                     //TODO:odd!
-                    for (j = i + 14; j < doctype.End && Lexbuf[j] != (byte) '/'; ++j)
+                    for (j = i + 14; j < doctype.End && Lexbuf[j] != (byte)'/'; ++j)
                     {
                     }
 
@@ -1116,7 +1116,7 @@ namespace Tidy.Core
             {
                 int s = root.Content.Start;
 
-                if (Lexbuf[s] == (byte) 'x' && Lexbuf[s + 1] == (byte) 'm' && Lexbuf[s + 2] == (byte) 'l')
+                if (Lexbuf[s] == (byte)'x' && Lexbuf[s + 1] == (byte)'m' && Lexbuf[s + 2] == (byte)'l')
                 {
                     return true;
                 }
@@ -1193,7 +1193,7 @@ namespace Tidy.Core
             Txtend = Lexsize;
 
             lastc = '\x0000';
-            start = - 1;
+            start = -1;
 
             while (true)
             {
@@ -1245,11 +1245,11 @@ namespace Tidy.Core
                             Lexbuf[i] = Lexbuf[i - 1];
                         }
 
-                        Lexbuf[start - 1] = (byte) '\\';
+                        Lexbuf[start - 1] = (byte)'\\';
                         Lexsize++;
                     }
 
-                    start = - 1;
+                    start = -1;
                 }
                 else if (c == '\r')
                 {
@@ -1304,7 +1304,7 @@ namespace Tidy.Core
             if (Pushed)
             {
                 /* duplicate inlines in preference to pushed text nodes when appropriate */
-                if (Token.Type != Node.TEXT_NODE || (Insert == - 1 && Inode == null))
+                if (Token.Type != Node.TEXT_NODE || (Insert == -1 && Inode == null))
                 {
                     Pushed = false;
                     return Token;
@@ -1314,7 +1314,7 @@ namespace Tidy.Core
             /* at start of block elements, unclosed inline
 			elements are inserted into the token stream */
 
-            if (Insert != - 1 || Inode != null)
+            if (Insert != -1 || Inode != null)
             {
                 return InsertedToken();
             }
@@ -1361,7 +1361,7 @@ namespace Tidy.Core
                 switch (State)
                 {
                     case LEX_CONTENT:
-                        map = Map((char) c);
+                        map = Map((char)c);
 
                         /*
 						Discard white space if appropriate. Its cheaper
@@ -1395,14 +1395,14 @@ namespace Tidy.Core
                                     Columns = Input.CursorColumn;
                                 }
                             }
-                                /* prev char wasn't white */
+                            /* prev char wasn't white */
                             else
                             {
                                 Waswhite = true;
 
                                 if (mode != PREFORMATTED && mode != IGNORE_MARKUP && c != ' ')
                                 {
-                                    ChangeChar((byte) ' ');
+                                    ChangeChar((byte)' ');
                                 }
                             }
 
@@ -1432,7 +1432,7 @@ namespace Tidy.Core
                             }
 
                             AddCharToLexer(c);
-                            map = Map((char) c);
+                            map = Map((char)c);
 
                             if ((map & LETTER) != 0)
                             {
@@ -1440,14 +1440,14 @@ namespace Tidy.Core
                                 Txtend = Lexsize;
                                 Input.UngetChar(c);
                                 State = LEX_ENDTAG;
-                                Lexbuf[Lexsize] = (byte) '\x0000'; /* debug */
+                                Lexbuf[Lexsize] = (byte)'\x0000'; /* debug */
                                 Input.CursorColumn -= 2;
 
                                 /* if some text before the </ return it now */
                                 if (Txtend > Txtstart)
                                 {
                                     /* trim space char before end tag */
-                                    if (mode == IGNORE_WHITESPACE && Lexbuf[Lexsize - 1] == (byte) ' ')
+                                    if (mode == IGNORE_WHITESPACE && Lexbuf[Lexsize - 1] == (byte)' ')
                                     {
                                         Lexsize -= 1;
                                         Txtend = Lexsize;
@@ -1512,7 +1512,7 @@ namespace Tidy.Core
 
                                 /* skip until white space or '>' */
 
-                                for (;;)
+                                for (; ; )
                                 {
                                     c = Input.ReadChar();
 
@@ -1522,7 +1522,7 @@ namespace Tidy.Core
                                         break;
                                     }
 
-                                    map = Map((char) c);
+                                    map = Map((char)c);
                                     if ((map & WHITE) == 0)
                                     {
                                         continue;
@@ -1530,7 +1530,7 @@ namespace Tidy.Core
 
                                     /* and skip to end of whitespace */
 
-                                    for (;;)
+                                    for (; ; )
                                     {
                                         c = Input.ReadChar();
 
@@ -1540,7 +1540,7 @@ namespace Tidy.Core
                                             break;
                                         }
 
-                                        map = Map((char) c);
+                                        map = Map((char)c);
 
                                         if ((map & WHITE) != 0)
                                         {
@@ -1590,7 +1590,7 @@ namespace Tidy.Core
                                 {
                                     break;
                                 }
-                                if (c == - 1)
+                                if (c == -1)
                                 {
                                     Input.UngetChar(c);
                                     break;
@@ -1598,7 +1598,7 @@ namespace Tidy.Core
                             }
 
                             Lexsize -= 2;
-                            Lexbuf[Lexsize] = (byte) '\x0000';
+                            Lexbuf[Lexsize] = (byte)'\x0000';
                             State = LEX_CONTENT;
                             continue;
                         }
@@ -1660,7 +1660,7 @@ namespace Tidy.Core
                             continue;
                         }
 
-                        map = Map((char) c);
+                        map = Map((char)c);
 
                         /* check for start tag */
                         if ((map & LETTER) != 0)
@@ -1828,7 +1828,7 @@ namespace Tidy.Core
                                 }
 
                                 Txtend = Lexsize - 2; // AQ 8Jul2000
-                                Lexbuf[Lexsize] = (byte) '\x0000';
+                                Lexbuf[Lexsize] = (byte)'\x0000';
                                 State = LEX_CONTENT;
                                 Waswhite = false;
                                 Token = NewNode(Node.COMMENT_TAG, Lexbuf, Txtstart, Txtend);
@@ -1869,7 +1869,7 @@ namespace Tidy.Core
                             badcomment++;
                             if (Options.FixComments)
                             {
-                                Lexbuf[Lexsize - 2] = (byte) '=';
+                                Lexbuf[Lexsize - 2] = (byte)'=';
                             }
 
                             AddCharToLexer(c);
@@ -1882,12 +1882,12 @@ namespace Tidy.Core
                         }
 
                         /* otherwise continue to look for --> */
-                        Lexbuf[Lexsize - 2] = (byte) '=';
+                        Lexbuf[Lexsize - 2] = (byte)'=';
                         continue;
 
 
                     case LEX_DOCTYPE:
-                        map = Map((char) c);
+                        map = Map((char)c);
 
                         if ((map & WHITE) != 0)
                         {
@@ -1910,7 +1910,7 @@ namespace Tidy.Core
 
                         Lexsize -= 1;
                         Txtend = Lexsize;
-                        Lexbuf[Lexsize] = (byte) '\x0000';
+                        Lexbuf[Lexsize] = (byte)'\x0000';
                         State = LEX_CONTENT;
                         Waswhite = false;
                         Token = NewNode(Node.DOC_TYPE_TAG, Lexbuf, Txtstart, Txtend);
@@ -1958,7 +1958,7 @@ namespace Tidy.Core
 
                         Lexsize -= 1;
                         Txtend = Lexsize;
-                        Lexbuf[Lexsize] = (byte) '\x0000';
+                        Lexbuf[Lexsize] = (byte)'\x0000';
                         State = LEX_CONTENT;
                         Waswhite = false;
                         Token = NewNode(Node.PROC_INS_TAG, Lexbuf, Txtstart, Txtend);
@@ -1982,7 +1982,7 @@ namespace Tidy.Core
 
                         Lexsize -= 1;
                         Txtend = Lexsize;
-                        Lexbuf[Lexsize] = (byte) '\x0000';
+                        Lexbuf[Lexsize] = (byte)'\x0000';
                         State = LEX_CONTENT;
                         Waswhite = false;
                         Token = NewNode(Node.ASP_TAG, Lexbuf, Txtstart, Txtend);
@@ -2004,7 +2004,7 @@ namespace Tidy.Core
 
                         Lexsize -= 1;
                         Txtend = Lexsize;
-                        Lexbuf[Lexsize] = (byte) '\x0000';
+                        Lexbuf[Lexsize] = (byte)'\x0000';
                         State = LEX_CONTENT;
                         Waswhite = false;
                         Token = NewNode(Node.JSTE_TAG, Lexbuf, Txtstart, Txtend);
@@ -2026,7 +2026,7 @@ namespace Tidy.Core
 
                         Lexsize -= 1;
                         Txtend = Lexsize;
-                        Lexbuf[Lexsize] = (byte) '\x0000';
+                        Lexbuf[Lexsize] = (byte)'\x0000';
                         State = LEX_CONTENT;
                         Waswhite = false;
                         Token = NewNode(Node.PHP_TAG, Lexbuf, Txtstart, Txtend);
@@ -2059,7 +2059,7 @@ namespace Tidy.Core
 
                         Lexsize -= 1;
                         Txtend = Lexsize;
-                        Lexbuf[Lexsize] = (byte) '\x0000';
+                        Lexbuf[Lexsize] = (byte)'\x0000';
                         State = LEX_CONTENT;
                         Waswhite = false;
                         Token = NewNode(Node.SECTION_TAG, Lexbuf, Txtstart, Txtend);
@@ -2089,7 +2089,7 @@ namespace Tidy.Core
 
                         Lexsize -= 1;
                         Txtend = Lexsize;
-                        Lexbuf[Lexsize] = (byte) '\x0000';
+                        Lexbuf[Lexsize] = (byte)'\x0000';
                         State = LEX_CONTENT;
                         Waswhite = false;
                         Token = NewNode(Node.CDATA_TAG, Lexbuf, Txtstart, Txtend);
@@ -2104,7 +2104,7 @@ namespace Tidy.Core
                 if (Txtend > Txtstart)
                 {
                     Input.UngetChar(c);
-                    if (Lexbuf[Lexsize - 1] == (byte) ' ')
+                    if (Lexbuf[Lexsize - 1] == (byte)' ')
                     {
                         Lexsize -= 1;
                         Txtend = Lexsize;
@@ -2123,7 +2123,7 @@ namespace Tidy.Core
                 }
 
                 Txtend = Lexsize;
-                Lexbuf[Lexsize] = (byte) '\x0000';
+                Lexbuf[Lexsize] = (byte)'\x0000';
                 State = LEX_CONTENT;
                 Waswhite = false;
                 Token = NewNode(Node.COMMENT_TAG, Lexbuf, Txtstart, Txtend);
@@ -2155,7 +2155,7 @@ namespace Tidy.Core
             Node asp = null;
 
             Txtstart = Lexsize;
-            for (;;)
+            for (; ; )
             {
                 int c = Input.ReadChar();
                 AddCharToLexer(c);
@@ -2197,7 +2197,7 @@ namespace Tidy.Core
 
             Txtstart = Lexsize;
 
-            for (;;)
+            for (; ; )
             {
                 int c = Input.ReadChar();
                 AddCharToLexer(c);
@@ -2240,7 +2240,7 @@ namespace Tidy.Core
             php.Object = null; /* clear php pointer */
             /* skip white space before the attribute */
 
-            for (;;)
+            for (; ; )
             {
                 c = Input.ReadChar();
                 if (c == '/')
@@ -2295,7 +2295,7 @@ namespace Tidy.Core
                     return null;
                 }
 
-                map = Map((char) c);
+                map = Map((char)c);
 
                 if ((map & WHITE) == 0)
                 {
@@ -2305,7 +2305,7 @@ namespace Tidy.Core
 
             start = Lexsize;
 
-            for (;;)
+            for (; ; )
             {
                 /* but push back '=' for parseValue() */
                 if (c == '=' || c == '>')
@@ -2320,7 +2320,7 @@ namespace Tidy.Core
                     break;
                 }
 
-                map = Map((char) c);
+                map = Map((char)c);
 
                 if ((map & WHITE) != 0)
                     break;
@@ -2369,7 +2369,7 @@ namespace Tidy.Core
                 isrule = true;
             }
 
-            for (;;)
+            for (; ; )
             {
                 c = Input.ReadChar();
 
@@ -2395,7 +2395,7 @@ namespace Tidy.Core
                 /* then also finish value on whitespace */
                 if (!isrule)
                 {
-                    int map = Map((char) c);
+                    int map = Map((char)c);
 
                     if ((map & WHITE) != 0)
                     {
@@ -2456,7 +2456,7 @@ namespace Tidy.Core
 
             /* skip white space before the '=' */
 
-            for (;;)
+            for (; ; )
             {
                 c = Input.ReadChar();
 
@@ -2466,7 +2466,7 @@ namespace Tidy.Core
                     break;
                 }
 
-                map = Map((char) c);
+                map = Map((char)c);
 
                 if ((map & WHITE) == 0)
                 {
@@ -2488,7 +2488,7 @@ namespace Tidy.Core
 
             /* skip white space after '=' */
 
-            for (;;)
+            for (; ; )
             {
                 c = Input.ReadChar();
                 if (c == StreamIn.END_OF_STREAM)
@@ -2497,7 +2497,7 @@ namespace Tidy.Core
                     break;
                 }
 
-                map = Map((char) c);
+                map = Map((char)c);
 
                 if ((map & WHITE) == 0)
                     break;
@@ -2530,7 +2530,7 @@ namespace Tidy.Core
             start = Lexsize;
             c = '\x0000';
 
-            for (;;)
+            for (; ; )
             {
                 int lastc = c;
                 c = Input.ReadChar();
@@ -2542,7 +2542,7 @@ namespace Tidy.Core
                     break;
                 }
 
-                if (delim == (char) 0)
+                if (delim == (char)0)
                 {
                     if (c == '>')
                     {
@@ -2585,7 +2585,7 @@ namespace Tidy.Core
                         c = '/';
                     }
                 }
-                    /* delim is '\'' or '"' */
+                /* delim is '\'' or '"' */
                 else
                 {
                     if (c == delim)
@@ -2635,11 +2635,11 @@ namespace Tidy.Core
                     }
                 }
 
-                map = Map((char) c);
+                map = Map((char)c);
 
                 if ((map & WHITE) != 0)
                 {
-                    if (delim == (char) 0)
+                    if (delim == (char)0)
                         break;
 
                     if (munge)
@@ -2739,7 +2739,7 @@ namespace Tidy.Core
                     /* check if attributes are created by ASP markup */
                     if (asp.Object != null)
                     {
-                        av = new AttVal(list, null, (Node) asp.Object, null, '\x0000', null, null);
+                        av = new AttVal(list, null, (Node)asp.Object, null, '\x0000', null, null);
                         list = av;
                         continue;
                     }
@@ -2747,7 +2747,7 @@ namespace Tidy.Core
                     /* check if attributes are created by PHP markup */
                     if (php.Object != null)
                     {
-                        av = new AttVal(list, null, null, (Node) php.Object, '\x0000', null, null);
+                        av = new AttVal(list, null, null, (Node)php.Object, '\x0000', null, null);
                         list = av;
                         continue;
                     }
@@ -2808,7 +2808,7 @@ namespace Tidy.Core
                 return;
 
             // make sure there is enough space for the stack
-            var stack = new InlineStack {Tag = node.Tag, Element = node.Element};
+            var stack = new InlineStack { Tag = node.Tag, Element = node.Element };
             if (node.Attributes != null)
             {
                 stack.Attributes = CloneAttributes(node.Attributes);
@@ -2846,7 +2846,7 @@ namespace Tidy.Core
 
                     if (Insert >= Istack.Count)
                     {
-                        Insert = - 1;
+                        Insert = -1;
                     }
                     return;
                 }
@@ -2856,7 +2856,7 @@ namespace Tidy.Core
 
             if (Insert >= Istack.Count)
             {
-                Insert = - 1;
+                Insert = -1;
             }
         }
 
@@ -2914,7 +2914,7 @@ namespace Tidy.Core
             int n;
 
             // this will only be null if inode != null
-            if (Insert == - 1)
+            if (Insert == -1)
             {
                 node = Inode;
                 Inode = null;
@@ -2951,7 +2951,7 @@ namespace Tidy.Core
             }
             else
             {
-                Insert = - 1;
+                Insert = -1;
             }
 
             return node;
@@ -3020,7 +3020,7 @@ namespace Tidy.Core
 
         public virtual void DeferDup()
         {
-            Insert = - 1;
+            Insert = -1;
             Inode = null;
         }
 
@@ -3040,7 +3040,7 @@ namespace Tidy.Core
 
         private static short Map(char c)
         {
-            return ((int) c < 128 ? (short) Lexmap[c] : (short) 0);
+            return ((int)c < 128 ? (short)Lexmap[c] : (short)0);
         }
 
         //private static bool IsWhite(char c)
@@ -3097,13 +3097,13 @@ namespace Tidy.Core
                 if (tocaps)
                 {
                     if ((m & LOWERCASE) != 0)
-                        c = (char) (c + 'A' - 'a');
+                        c = (char)(c + 'A' - 'a');
                 }
-                    /* force to lower case */
+                /* force to lower case */
                 else
                 {
                     if ((m & UPPERCASE) != 0)
-                        c = (char) (c + 'a' - 'A');
+                        c = (char)(c + 'a' - 'A');
                 }
             }
 

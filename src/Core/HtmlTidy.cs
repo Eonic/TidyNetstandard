@@ -225,200 +225,217 @@ namespace Tidy.Core
         {
             Node document = null;
             Out o = new OutImpl(); /* normal output stream */
-
-            /* ensure config is self-consistent */
-            _options.Adjust();
-
-            //using (var reader = new StreamReader(input))
-            //{
-            //    string response = reader.ReadToEnd();
-            //    input.Flush();
-            //    input.Position = 0;
-            //}
-
-            if (input != null)
+            Lexer lexer = null;
+            try
             {
-                var lexer = new Lexer(new ClsStreamInImpl(input, _options.CharEncoding, _options.TabSize), _options)
+
+                /* ensure config is self-consistent */
+                _options.Adjust();
+
+                //using (var reader = new StreamReader(input))
+                //{
+                //    string response = reader.ReadToEnd();
+                //    input.Flush();
+                //    input.Position = 0;
+                //}
+
+                if (input != null)
                 {
-                    Messages = messages
-                };
-
-                /*
-				store pointer to lexer in input stream
-				to allow character encoding errors to be
-				reported
-				*/
-                lexer.Input.Lexer = lexer;
-
-                /* Tidy doesn't alter the doctype for generic XML docs */
-                Node doctype;
-                if (_options.XmlTags)
-                {
-                    document = ParserImpl.ParseXmlDocument(lexer);
-                }
-                else
-                {
-                    document = ParserImpl.ParseDocument(lexer);
-
-                    if (!document.CheckNodeIntegrity())
+                    lexer = new Lexer(new ClsStreamInImpl(input, _options.CharEncoding, _options.TabSize), _options)
                     {
-                        Report.BadTree(lexer);
-                        return null;
+                        Messages = messages
+                    };
+
+                    /*
+                    store pointer to lexer in input stream
+                    to allow character encoding errors to be
+                    reported
+                    */
+                    lexer.Input.Lexer = lexer;
+
+                    /* Tidy doesn't alter the doctype for generic XML docs */
+                    Node doctype;
+                    if (_options.XmlTags)
+                    {
+                        document = ParserImpl.ParseXmlDocument(lexer);
                     }
-
-                    var cleaner = new Clean(_options.TagTable);
-
-                    /* simplifies <b><b> ... </b> ...</b> etc. */
-                    cleaner.NestedEmphasis(document);
-
-                    /* cleans up <dir>indented text</dir> etc. */
-                    cleaner.List2Bq(document);
-                    cleaner.Bq2Div(document);
-
-                    /* replaces i by em and b by strong */
-                    if (_options.LogicalEmphasis)
+                    else
                     {
-                        cleaner.EmFromI(document);
-                    }
-
-                    if (_options.Word2000 && cleaner.IsWord2000(document, _options.TagTable))
-                    {
-                        /* prune Word2000's <![if ...]> ... <![endif]> */
-                        cleaner.DropSections(lexer, document);
-
-                        /* drop style & class attributes and empty p, span elements */
-                        cleaner.CleanWord2000(lexer, document);
-                    }
-
-                    /* replaces presentational markup by style rules */
-                    if (_options.MakeClean || _options.DropFontTags)
-                    {
-                        cleaner.CleanTree(lexer, document);
-                    }
-
-
-
-
-
-                    if (!document.CheckNodeIntegrity())
-                    {
-                        Report.BadTree(lexer);
-                        return null;
-                    }
-                    doctype = document.FindDocType();
-                    if (document.Content != null && _options.MakeBare != true)
-                    {
-                        if (_options.Xhtml)
+                        try
                         {
-                            lexer.SetXhtmlDocType(document);
+                            document = ParserImpl.ParseDocument(lexer);
                         }
-                        else
+                        catch
                         {
-                            lexer.FixDocType(document);
+                            document = ParserImpl.ParseXmlDocument(lexer);
                         }
 
-                        if (_options.TidyMark)
+                        if (!document.CheckNodeIntegrity())
                         {
-                            lexer.AddGenerator(document);
+                            Report.BadTree(lexer);
+                            return null;
                         }
-                    }
+
+                        var cleaner = new Clean(_options.TagTable);
+
+                        /* simplifies <b><b> ... </b> ...</b> etc. */
+                        cleaner.NestedEmphasis(document);
+
+                        /* cleans up <dir>indented text</dir> etc. */
+                        cleaner.List2Bq(document);
+                        cleaner.Bq2Div(document);
+
+                        /* replaces i by em and b by strong */
+                        if (_options.LogicalEmphasis)
+                        {
+                            cleaner.EmFromI(document);
+                        }
+
+                        if (_options.Word2000 && cleaner.IsWord2000(document, _options.TagTable))
+                        {
+                            /* prune Word2000's <![if ...]> ... <![endif]> */
+                            cleaner.DropSections(lexer, document);
+
+                            /* drop style & class attributes and empty p, span elements */
+                            cleaner.CleanWord2000(lexer, document);
+                        }
+
+                        /* replaces presentational markup by style rules */
+                        if (_options.MakeClean || _options.DropFontTags)
+                        {
+                            cleaner.CleanTree(lexer, document);
+                        }
 
 
 
-                    /* ensure presence of initial <?XML version="1.0"?> */
-                    if (_options.XmlOut && _options.XmlPi)
-                    {
-                        lexer.FixXmlPi(document);
-                    }
 
-                    if (document.Content != null)
-                    {
-                        Report.ReportVersion(lexer, doctype);
-                        Report.ReportNumWarnings(lexer);
-                    }
-                }
 
-                if (lexer.Messages.Errors > 0)
-                {
-                    Report.NeedsAuthorIntervention(lexer);
-                }
-
-                if (_options.BodyOnly)
-                {
-                    document = document.FindBody(_options.TagTable);
-                }
-
-                o.State = StreamIn.FSM_ASCII;
-                o.Encoding = _options.CharEncoding;
-
-                if (lexer.Messages.Errors == 0)
-                {
-                    PPrint pprint;
-                    if (_options.BurstSlides)
-                    {
-                        /*
-						remove doctype to avoid potential clash with
-						markup introduced when bursting into slides
-						*/
-                        /* discard the document type */
+                        if (!document.CheckNodeIntegrity())
+                        {
+                            Report.BadTree(lexer);
+                            return null;
+                        }
                         doctype = document.FindDocType();
-
-                        if (doctype != null)
+                        if (document.Content != null && _options.MakeBare != true)
                         {
-                            Node.DiscardElement(doctype);
+                            if (_options.Xhtml)
+                            {
+                                lexer.SetXhtmlDocType(document);
+                            }
+                            else
+                            {
+                                lexer.FixDocType(document);
+                            }
+
+                            if (_options.TidyMark)
+                            {
+                                lexer.AddGenerator(document);
+                            }
                         }
 
-                        /* slides use transitional features */
-                        lexer.Versions |= HtmlVersion.Html40Loose;
 
-                        /* and patch up doctype to match */
-                        if (_options.Xhtml)
+
+                        /* ensure presence of initial <?XML version="1.0"?> */
+                        if (_options.XmlOut && _options.XmlPi)
                         {
-                            lexer.SetXhtmlDocType(document);
-                        }
-                        else
-                        {
-                            lexer.FixDocType(document);
+                            lexer.FixXmlPi(document);
                         }
 
-                        /* find the body element which may be implicit */
-                        Node body = document.FindBody(_options.TagTable);
+                        if (document.Content != null)
+                        {
+                            Report.ReportVersion(lexer, doctype);
+                            Report.ReportNumWarnings(lexer);
+                        }
+                    }
 
-                        if (body != null)
+                    if (lexer.Messages.Errors > 0)
+                    {
+                        Report.NeedsAuthorIntervention(lexer);
+                    }
+
+                    if (_options.BodyOnly)
+                    {
+                        document = document.FindBody(_options.TagTable);
+                    }
+
+                    o.State = StreamIn.FSM_ASCII;
+                    o.Encoding = _options.CharEncoding;
+
+                    if (lexer.Messages.Errors == 0)
+                    {
+                        PPrint pprint;
+                        if (_options.BurstSlides)
+                        {
+                            /*
+                            remove doctype to avoid potential clash with
+                            markup introduced when bursting into slides
+                            */
+                            /* discard the document type */
+                            doctype = document.FindDocType();
+
+                            if (doctype != null)
+                            {
+                                Node.DiscardElement(doctype);
+                            }
+
+                            /* slides use transitional features */
+                            lexer.Versions |= HtmlVersion.Html40Loose;
+
+                            /* and patch up doctype to match */
+                            if (_options.Xhtml)
+                            {
+                                lexer.SetXhtmlDocType(document);
+                            }
+                            else
+                            {
+                                lexer.FixDocType(document);
+                            }
+
+                            /* find the body element which may be implicit */
+                            Node body = document.FindBody(_options.TagTable);
+
+                            if (body != null)
+                            {
+                                pprint = new PPrint(_options);
+                                Report.ReportNumberOfSlides(lexer, pprint.CountSlides(body));
+                                pprint.CreateSlides(lexer, document);
+                            }
+                            else
+                            {
+                                Report.MissingBody(lexer);
+                            }
+                        }
+                        else if (output != null)
                         {
                             pprint = new PPrint(_options);
-                            Report.ReportNumberOfSlides(lexer, pprint.CountSlides(body));
-                            pprint.CreateSlides(lexer, document);
-                        }
-                        else
-                        {
-                            Report.MissingBody(lexer);
+                            o.Output = output;
+
+                            if (_options.XmlTags)
+                            {
+                                pprint.PrintXmlTree(o, 0, 0, lexer, document);
+                            }
+                            else
+                            {
+                                pprint.PrintTree(o, 0, 0, lexer, document);
+                            }
+
+                            pprint.FlushLine(o, 0);
                         }
                     }
-                    else if (output != null)
-                    {
-                        pprint = new PPrint(_options);
-                        o.Output = output;
 
-                        if (_options.XmlTags)
-                        {
-                            pprint.PrintXmlTree(o, 0, 0, lexer, document);
-                        }
-                        else
-                        {
-                            pprint.PrintTree(o, 0, 0, lexer, document);
-                        }
-
-                        pprint.FlushLine(o, 0);
-                    }
+                    Report.ErrorSummary(lexer);
                 }
 
-                Report.ErrorSummary(lexer);
+
+                return document;
             }
-
-
-            return document;
-
+            catch (System.Exception ex)
+            {
+                TidyMessage tm = new TidyMessage(lexer, ex.Message, MessageLevel.Error);
+                lexer.Messages.Add(tm);
+                Report.ErrorSummary(lexer);
+                return document;
+            }
         }
 
         /// <summary>
