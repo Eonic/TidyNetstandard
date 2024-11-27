@@ -270,20 +270,20 @@ namespace Tidy.Core
                             document = ParserImpl.ParseXmlDocument(lexer);
                         }
 
-                        if (!document.CheckNodeIntegrity())
-                        {
-                            Report.BadTree(lexer);
-                            return null;
-                        }
+                        //if (!document.CheckNodeIntegrity())
+                        //{
+                        //    Report.BadTree(lexer);
+                        //    return null;
+                        //}
 
                         var cleaner = new Clean(_options.TagTable);
 
                         /* simplifies <b><b> ... </b> ...</b> etc. */
-                        cleaner.NestedEmphasis(document);
+                        // cleaner.NestedEmphasis(document);
 
                         /* cleans up <dir>indented text</dir> etc. */
-                        cleaner.List2Bq(document);
-                        cleaner.Bq2Div(document);
+                        //  cleaner.List2Bq(document);
+                        //  cleaner.Bq2Div(document);
 
                         /* replaces i by em and b by strong */
                         if (_options.LogicalEmphasis)
@@ -305,10 +305,6 @@ namespace Tidy.Core
                         {
                             cleaner.CleanTree(lexer, document);
                         }
-
-
-
-
 
                         if (!document.CheckNodeIntegrity())
                         {
@@ -332,9 +328,6 @@ namespace Tidy.Core
                                 lexer.AddGenerator(document);
                             }
                         }
-
-
-
                         /* ensure presence of initial <?XML version="1.0"?> */
                         if (_options.XmlOut && _options.XmlPi)
                         {

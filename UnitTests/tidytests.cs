@@ -4,54 +4,54 @@ namespace TidyTests
 {
     public class Tests
     {
+        private Tidy.Core.TidyOptions oTdyOptions;
+        private Tidy.Core.HtmlTidy oTdy;
         [SetUp]
         public void Setup()
         {
+            oTdy = new Tidy.Core.HtmlTidy();
+            // oTdyOptions = new Tidy.Core.TidyOptions();
+
+            oTdy.Options.Word2000 = true;
+            oTdy.Options.XmlOut = true;
+            oTdy.Options.MakeClean = true;
+            oTdy.Options.MakeBare = true;
+            oTdy.Options.Xhtml = true;
+            oTdy.Options.DropFontTags = true;
+            oTdy.Options.BodyOnly = true;
+            oTdy.Options.NumEntities = true;
+            oTdy.Options.LogicalEmphasis = true;
+
         }
 
-        [Test]
-        public void Test1()
+
+
+        string removeBody(string html)
         {
-            String htmlcorrect = "<h1>Tidy is Tidying</h1>";
-            String htmltotest = "<h1>Tidy is Tidying</H1>";
-            Tidy.Core.HtmlTidy oTdyManaged = new Tidy.Core.HtmlTidy();
-            Tidy.Core.TidyOptions oTdyOptions = new Tidy.Core.TidyOptions();
+            return html.Replace("<body>", "").Replace("</body>", "").Trim();
+        }
 
-            oTdyManaged.Options.Word2000 = true;
-            oTdyManaged.Options.XmlOut = true;
-
-            oTdyManaged.Options.MakeClean = true;
-            oTdyManaged.Options.MakeBare = true;
-            oTdyManaged.Options.Xhtml = true;
-            oTdyManaged.Options.DropFontTags = true;
-            oTdyManaged.Options.BodyOnly = true;
-            oTdyManaged.Options.NumEntities = true;
-
+        void runStringStest(string htmltest, string htmlcorrect)
+        {
+            Setup();
             Tidy.Core.TidyMessageCollection tidyMsg = new Tidy.Core.TidyMessageCollection();
-
-            string sTidyXhtml = oTdyManaged.Parse(htmltotest, tidyMsg);
-
-
-            //sTidyXhtml = oTdyManaged.ToString();
-
+            string sTidyXhtml = oTdy.Parse(htmltest, tidyMsg);
             foreach (TidyMessage tm in tidyMsg)
             {
-                if (tm.Level == MessageLevel.Error)
-                {
-                    sTidyXhtml = "<div>html import conversion error result=" + tm.Message + " <br/></div>";
-                }
+                TestContext.WriteLine(tm.Level.ToString() + " - " + tm.Message + " line:" + tm.Line);
             }
 
-            oTdyManaged = null;
+            sTidyXhtml = removeBody(sTidyXhtml);
+            //remove line breaks
+            sTidyXhtml = sTidyXhtml.Replace("\r\n", "").Replace("\n", "").Replace("\r", "");
 
-            sTidyXhtml = sTidyXhtml.Replace("<body>", "").Replace("</body>", "").Trim();
             TestContext.WriteLine("htmltotest");
-            TestContext.WriteLine(htmltotest);
+            TestContext.WriteLine(htmltest);
             TestContext.WriteLine("htmltidied");
             TestContext.WriteLine(sTidyXhtml);
 
-            // Assert.That(result, Is.False, $"{value} should not be prime");
-
+            sTidyXhtml = sTidyXhtml.Replace("\r\n", "").Replace("\n", "").Replace("\r", "");
+            htmltest = htmltest.Replace("\r\n", "").Replace("\n", "").Replace("\r", "");
 
             if (sTidyXhtml == htmlcorrect)
             {
@@ -64,5 +64,49 @@ namespace TidyTests
                 Assert.Fail();
             }
         }
+
+        [Test]
+        public void h1()
+        {
+            String htmlcorrect = "<h1>Tidy is Tidying</h1>";
+            String htmltotest = "<h1>Tidy is Tidying</H1>";
+
+            runStringStest(htmltotest, htmlcorrect);
+        }
+
+        [Test]
+        public void em()
+        {
+            String htmlcorrect = "<div><h1><em class=\"test\">Tidy is Tidying</em></h1><p>some text</p></div><div>some more text</div>";
+            String htmltotest = "<div><h1><em class=\"test\">Tidy is Tidying</em></h1><p>some text</p></div><div>some more text</div>";
+
+            runStringStest(htmltotest, htmlcorrect);
+        }
+
+        [Test]
+        public void table()
+        {
+            String htmlcorrect = "<div><table><tr><td>Tidy is Tidying</td></tr><tr><td>some text</td></tr></table></div>";
+            String htmltotest = "<div><table><tr><td>Tidy is Tidying</td></tr><tr><td>some text</td></tr>";
+
+            runStringStest(htmltotest, htmlcorrect);
+        }
+        [Test]
+        public void em2i()
+        {
+            String htmlcorrect = "<div><h1><em>Tidy is Tidying</em></h1><p>some text</p></div>";
+            String htmltotest = "<div><h1><i>Tidy is Tidying</i></h1><p>some text</p></div>";
+
+            runStringStest(htmltotest, htmlcorrect);
+        }
+        [Test]
+        public void b2strong()
+        {
+            String htmlcorrect = "<div><strong>Tidy is Tidying</strong><p>some text</p></div>";
+            String htmltotest = "<div><b>Tidy is Tidying</b><p>some text</p></div>";
+
+            runStringStest(htmltotest, htmlcorrect);
+        }
+
     }
 }
