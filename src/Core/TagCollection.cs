@@ -173,7 +173,7 @@ namespace Tidy.Core
                 new Dict("span", HtmlVersion.From32, ContentModel.INLINE, ParserImpl.ParseInline, null),
                 new Dict("blink", HtmlVersion.Proprietary, ContentModel.INLINE, ParserImpl.ParseInline, null),
                 new Dict("nobr", HtmlVersion.Proprietary, ContentModel.INLINE, ParserImpl.ParseInline, null),
-                new Dict("wbr", HtmlVersion.Proprietary, ContentModel.INLINE | ContentModel.EMPTY, null, null),
+               // new Dict("wbr", HtmlVersion.Proprietary, ContentModel.INLINE | ContentModel.EMPTY, null, null),
                 new Dict("marquee", HtmlVersion.Microsoft, ContentModel.INLINE | ContentModel.OPT,
                          ParserImpl.ParseInline, null),
                 new Dict("bgsound", HtmlVersion.Microsoft, ContentModel.HEAD | ContentModel.EMPTY, null, null),
